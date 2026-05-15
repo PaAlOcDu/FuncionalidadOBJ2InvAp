@@ -9,10 +9,14 @@
 <body>
 
     <header>
-        <div>Usuario: <span id="usuarioActivo"></span></div>
+        <div class="user-info">
+            <span>Usuario: <strong id="usuarioActivo"></strong></span> | 
+            <span>Rol: <strong id="rolActivoDisplay"></strong></span>
+        </div>
         <button onclick="cerrarSesion()" class="btn-logout">Cerrar Sesión</button>
     </header>
 
+    <!-- LOGIN -->
     <div id="login" class="login-container">
         <div class="login-left">
             <h1>🏢 Caja Honor TI</h1>
@@ -21,6 +25,10 @@
         <div class="login-right">
             <div class="login-box">
                 <h2>Iniciar Sesión</h2>
+                <div class="credenciales-hint">
+                    <p><strong>Admin:</strong> admin / admin</p>
+                    <p><strong>Técnico:</strong> tecnico / tecnico</p>
+                </div>
                 <input id="user" placeholder="Usuario">
                 <input id="pass" type="password" placeholder="Contraseña">
                 <div class="error" id="errorMsg"></div>
@@ -29,15 +37,20 @@
         </div>
     </div>
 
+    <!-- APP -->
     <div id="app" style="display:none;">
         <div class="container">
             <div class="sidebar">
                 <button onclick="mostrar('dashboard')">Dashboard</button>
                 <button onclick="mostrar('crear')" id="btnNavCrear">Crear Ticket</button>
+                <!-- NUEVO: Botón de Analítica (Solo para Administrador) -->
+                <button onclick="mostrar('analitica')" id="btnNavAnalitica" style="display: none;">Analítica y Reportes</button>
             </div>
 
             <div class="main">
+                <!-- DASHBOARD -->
                 <div id="dashboard">
+                    <h2>Gestión de Tickets</h2>
                     <div class="card">Abiertos: <span id="abiertos" class="count-abierto">0</span></div>
                     <div class="card">En Proceso: <span id="proceso" class="count-proceso">0</span></div>
                     <div class="card">Resueltos: <span id="resueltos" class="count-resuelto">0</span></div>
@@ -47,21 +60,23 @@
                         <table id="tabla">
                             <thead>
                                 <tr>
-                                    <th data-column="id" class="sortable">ID <span class="sort-icon">⇅</span></th>
-                                    <th data-column="asunto" class="sortable">Asunto <span class="sort-icon">⇅</span></th>
-                                    <th data-column="categoria" class="sortable">Categoría <span class="sort-icon">⇅</span></th>
-                                    <th data-column="prioridad" class="sortable">Prioridad <span class="sort-icon">⇅</span></th>
-                                    <th data-column="tecnico" class="sortable">Técnico Asignado <span class="sort-icon">⇅</span></th>
-                                    <th data-column="estado" class="sortable">Estado <span class="sort-icon">⇅</span></th>
+                                    <th data-column="id" class="sortable">ID ⇅</th>
+                                    <th data-column="asunto" class="sortable">Asunto ⇅</th>
+                                    <th data-column="categoria" class="sortable">Categoría ⇅</th>
+                                    <th data-column="prioridad" class="sortable">Prioridad ⇅</th>
+                                    <th data-column="tecnico" class="sortable">Técnico ⇅</th>
+                                    <th data-column="estado" class="sortable">Estado ⇅</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="ticketsBody">
-                                </tbody>
+                                <!-- Filas generadas por JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
 
+                <!-- CREAR / EDITAR TICKET -->
                 <div id="crear" style="display:none;" class="form-section">
                     <h3 id="formTitulo">Nuevo Ticket</h3>
                     <div class="form-group">
@@ -75,7 +90,7 @@
                                 <option value="hardware">Hardware / Equipos</option>
                                 <option value="software">Software / Aplicaciones</option>
                                 <option value="redes">Redes / Conectividad</option>
-                                <option value="documental">Gestión Documental / Archivos</option>
+                                <option value="documental">Gestión Documental</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -89,12 +104,53 @@
                     </div>
 
                     <div class="form-group">
-                        <textarea id="descripcion" rows="3" placeholder="Descripción detallada del problema..."></textarea>
+                        <textarea id="descripcion" rows="3" placeholder="Descripción detallada..."></textarea>
                     </div>
 
                     <div class="form-actions">
                         <button id="btnSubmit" onclick="guardarTicket()" class="btn-submit">Crear y Asignar</button>
-                        <button id="btnCancelar" onclick="limpiarFormulario()" class="btn-cancelar" style="display:none;">Cancelar Edición</button>
+                        <button id="btnCancelar" onclick="limpiarFormulario()" class="btn-cancelar" style="display:none;">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- NUEVO: ANALÍTICA Y REPORTES -->
+                <div id="analitica" style="display:none;">
+                    <h2>📈 Rendimiento y KPIs (Objetivo: Reducción del 40%)</h2>
+                    
+                    <div class="analytics-container">
+                        <div class="kpi-card">
+                            <h3>TMA (Tiempo Medio de Atención)</h3>
+                            <p class="kpi-value" id="kpiTma">0m 0s</p>
+                            <p class="kpi-desc">Tiempo desde creación hasta inicio de atención.</p>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <h3>TMR (Tiempo Medio de Resolución)</h3>
+                            <p class="kpi-value" id="kpiTmr">0m 0s</p>
+                            <p class="kpi-desc">Tiempo total desde creación hasta resolución.</p>
+                        </div>
+
+                        <div class="kpi-card target-card">
+                            <h3>Línea Base Histórica vs Actual</h3>
+                            <p class="kpi-value" id="kpiReduccion">0%</p>
+                            <p class="kpi-desc">Porcentaje de reducción de tiempos vs 48hrs históricas.</p>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive" style="margin-top: 20px;">
+                        <h3>Detalle de Tiempos por Ticket (Resueltos)</h3>
+                        <table id="tablaTiempos">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Categoría</th>
+                                    <th>Tiempo Total (Resolución)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tiemposBody">
+                                <!-- Filas generadas por JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
